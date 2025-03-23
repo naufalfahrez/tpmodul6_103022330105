@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 public class SayaTubeVideo
 {
@@ -8,27 +9,35 @@ public class SayaTubeVideo
 
     public SayaTubeVideo(string title)
     {
+        Debug.Assert(!string.IsNullOrEmpty(title), "Judul video tidak boleh null atau kosong");
+        Debug.Assert(title.Length <= 100, "Judul video tidak boleh lebih dari 100 karakter");
+
         Random random = new Random();
-        this.id = random.Next(10000, 99999);
+        this.id = random.Next(10000, 99999); 
         this.title = title;
         this.playCount = 0;
     }
 
     public void IncreasePlayCount(int count)
     {
-        if (count > 0)
+        Debug.Assert(count > 0 && count <= 10000000, "Jumlah play count harus antara 1 dan 10.000.000");
+
+        try
         {
-            this.playCount += count;
+            checked
+            {
+                this.playCount += count;
+            }
         }
-        else
+        catch (OverflowException)
         {
-            Console.WriteLine("Jumlah play count harus lebih besar dari 0.");
+            Console.WriteLine("Terjadi overflow saat menambah play count!");
         }
     }
 
     public void PrintVideoDetails()
     {
-        Console.WriteLine($"ID: {this.id}");
+         Console.WriteLine($"ID: {this.id}");
         Console.WriteLine($"Title: {this.title}");
         Console.WriteLine($"Play Count: {this.playCount}");
     }
@@ -38,12 +47,22 @@ class Program
 {
     static void Main(string[] args)
     {
-        SayaTubeVideo video = new SayaTubeVideo("Tutorial Design By Contract – Naufal Fahreza");
+        try
+        {
+            SayaTubeVideo video = new SayaTubeVideo("Tutorial Design By Contract – Naufal Fahreza");
+            video.PrintVideoDetails();
 
-        video.PrintVideoDetails();
+            video.IncreasePlayCount(10000000);
+            video.PrintVideoDetails();
 
-        video.IncreasePlayCount(10);
-
-        video.PrintVideoDetails();
+            for (int i = 0; i < 50; i++)
+            {
+                video.IncreasePlayCount(10000000);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Terjadi kesalahan: " + ex.Message);
+        }
     }
 }
